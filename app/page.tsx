@@ -163,6 +163,9 @@ export default function Home() {
   const [history, setHistory] = useState<HistoryItem[]>([]);
   const [sidebarTab, setSidebarTab] = useState<'methods' | 'history'>('methods');
   const [computation, setComputation] = useState<MethodResult | null>(null);
+  const [x0, setX0] = useState("1"); // Para Newton y Secante
+  const [x1, setX1] = useState("2"); // Para Bisección (límite b) o Secante
+  const [tol, setTol] = useState("0.0001");
   // --- Cargar historial al iniciar ---
   useEffect(() => {
     const savedHistory = localStorage.getItem('math_solver_history');
@@ -219,15 +222,17 @@ const handleRun = () => {
   if (!formula.trim()) return;
 
   const fn = parseFunction(formula);
-
+  const val0 = parseFloat(x0);
+  const val1 = parseFloat(x1);
+  const tolerance = parseFloat(tol);
   let result;
 
   if (activeMethod === "Newton-Raphson") {
-    result = newtonRaphson(fn, 1);
+    result = newtonRaphson(fn, val0, tolerance);
   } else if (activeMethod === "Bisección") {
-    result = biseccion(fn, 0, 2);
+    result = biseccion(fn, val0, val1, tolerance);
   } else if (activeMethod === "Secante") {
-    result = secante(fn, 0, 2);
+    result = secante(fn, val0, val1, tolerance);
   }
 
   if (!result) return;
@@ -421,14 +426,31 @@ const handleRun = () => {
             </div>
 
             <div className="w-full max-w-2xl grid grid-cols-1 sm:grid-cols-2 gap-4">
-              <div className="bg-white/60 p-6 rounded-3xl border border-gray-100 backdrop-blur-sm shadow-sm">
-                <label className="text-[10px] font-bold text-gray-400 uppercase tracking-wider block mb-2">Valor Inicial (x₀)</label>
-                <input type="text" placeholder="0.0" className="w-full bg-transparent border-b border-gray-100 py-1.5 outline-none focus:border-blue-500 transition-colors text-xl font-medium placeholder:text-gray-200" />
-              </div>
-              <div className="bg-white/60 p-6 rounded-3xl border border-gray-100 backdrop-blur-sm shadow-sm">
-                <label className="text-[10px] font-bold text-gray-400 uppercase tracking-wider block mb-2">Tolerancia (ε)</label>
-                <input type="text" placeholder="0.0001" className="w-full bg-transparent border-b border-gray-100 py-1.5 outline-none focus:border-blue-500 transition-colors text-xl font-medium placeholder:text-gray-200" />
-              </div>
+		<div className="bg-white/60 p-6 rounded-3xl border border-gray-100 backdrop-blur-sm shadow-sm">
+		  <label className="text-[10px] font-bold text-gray-400 uppercase tracking-wider block mb-2">
+		    {activeMethod === "Bisección" ? "Límite Inferior (a)" : "Valor Inicial (x₀)"}
+		  </label>
+		  <input 
+		    type="number" 
+		    value={x0}
+		    onChange={(e) => setX0(e.target.value)}
+		    placeholder="0.0" 
+		    className="w-full bg-transparent border-b border-gray-100 py-1.5 outline-none focus:border-blue-500 transition-colors text-xl font-medium" 
+		  />
+		</div>
+
+		<div className="bg-white/60 p-6 rounded-3xl border border-gray-100 backdrop-blur-sm shadow-sm">
+		  <label className="text-[10px] font-bold text-gray-400 uppercase tracking-wider block mb-2">
+		    {activeMethod === "Bisección" ? "Límite Superior (b)" : "Tolerancia (ε)"}
+		  </label>
+		  <input 
+		    type="number" 
+		    value={activeMethod === "Bisección" ? x1 : tol}
+		    onChange={(e) => activeMethod === "Bisección" ? setX1(e.target.value) : setTol(e.target.value)}
+		    placeholder="0.0001" 
+		    className="w-full bg-transparent border-b border-gray-100 py-1.5 outline-none focus:border-blue-500 transition-colors text-xl font-medium" 
+		  />
+		</div>
             </div>
           </div>
         </main>
