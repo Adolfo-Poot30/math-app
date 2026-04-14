@@ -25,7 +25,6 @@ import { newtonRaphson, biseccion, secante, type MethodResult } from './methods'
 const parseFunction = (formula: string) => {
   return (x: number) => {
     try {
-      // Reemplazos para compatibilidad con eval y sintaxis matemática común
       const expr = formula
         .replace(/π/g, Math.PI.toString())
         .replace(/e/g, Math.E.toString())
